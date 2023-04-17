@@ -1,0 +1,410 @@
+categories:
+  erc20:
+    id: 0
+    name: "ERC20 (Fungible Token)"
+  erc721:
+    id: 1
+    name: "ERC721 (Non-Fungible Token)"
+
+specs:
+  - name: "transfer should revert if a user attempts to send more funds than they have"
+    category: "erc20"
+    tags: ["transfer"]
+    spec: |
+      vars: ERC20 t
+      inv:  reverted(t.transfer(to, amt), amt > t.balanceOf(sender))
+  - name: "Funds should be transferred from sender to to as long as sender != to"
+    category: "erc20"
+    tags: ["transfer"]
+    spec: |
+      vars: ERC20 t
+      inv:  finished(t.transfer(to, amt),
+        to != sender |=>
+          t.balanceOf(sender) = old(t.balanceOf(sender)) - amt &&
+          t.balanceOf(to) = old(t.balanceOf(to)) + amt
+      )
+
+  - name: "transfer should not modify totalSupply, allowances or balances other than sender and to"
+    category: "erc20"
+    tags: ["transfer"]
+    spec: |
+      vars: ERC20 t, address o1, address o2, address o3
+      inv:  finished(t.transfer(to, amt),
+        o1 != sender && o1 != to |=>
+          t.totalSupply() = old(t.totalSupply()) &&
+          t.balanceOf(o1) = old(t.balanceOf(o1)) &&
+          t.allowance(o2, o3) = old(t.allowance(o2, o3))
+      )
+
+  - name: "transferFrom should revert if a user attempts to send more than from owns or more than their allowance"
+    category: "erc20"
+    tags: ["transferFrom"]
+    desc: ""
+    spec: |
+      vars: ERC20 t
+      inv:  reverted(t.transferFrom(from, to, amt),
+        amt > t.balanceOf(from) || (from != sender && amt > t.allowance(from, sender))
+      )
+
+  - name: "As long as from != to, funds should be transferred from from to to and sender should have their allowance credited"
+    category: "erc20"
+    tags: ["transferFrom"]
+    spec: |
+      vars: ERC20 t
+      inv:  finished(t.transferFrom(from, to, amt),
+        from != to |=>
+          t.balanceOf(from) = old(t.balanceOf(from)) - amt &&
+          t.balanceOf(to) = old(t.balanceOf(to)) + amt &&
+          (from != sender && old(t.allowance(from, sender)) != MAX_INT) ==>
+            t.allowance(from, sender) = old(t.allowance(from, sender)) - amt
+      )
+
+  - name: "transferFrom should not modify totalSupply, other allowances or other balances"
+    category: "erc20"
+    tags: ["transferFrom"]
+    spec: |
+      vars: ERC20 t, address o1, address o2, address o3, address o4
+      inv:  finished(t.transferFrom(from, to, amt),
+        o1 != from && o1 != to && o2 != sender && o3 != from |=>
+          t.balanceOf(o1) = old(t.balanceOf(o1)) &&
+          t.allowance(from, o2) = old(t.allowance(from, o2)) &&
+          t.allowance(o3, o4) = old(t.allowance(o3, o4)) &&
+          t.totalSupply() = old(t.totalSupply())
+      )
+
+  - name: "approve makes appropriate state changes"
+    category: "erc20"
+    tags: ["approve"]
+    desc: |
+      approve should never finish in a state where the allowance of the spender is not equal to the given amount.
+      totalSupply, other allowances and balances should not be modified"
+    spec: |
+      vars: ERC20 t, address o1, address o2, address o3
+      inv:  finished(t.approve(spender, amt),
+        o2 != sender && o1 != spender |=>
+          t.allowance(sender, spender) = amt &&
+          t.allowance(sender, o1) = old(t.allowance(sender, o1)) &&
+          t.allowance(o2, o3) = old(t.allowance(o2, o3)) &&
+          t.balanceOf(o3) = old(t.balanceOf(o3)) &&
+      )
+
+  - name: "increaseAllowance makes appropriate state changes"
+    category: "erc20"
+    tags: ["increaseAllowance"]
+    desc: "The function should increase a user’s allowance by the indicated amount. TotalSupply, other allowances and balances should not be modified"
+    spec: |
+      vars: ERC20 t, address o1, address o2, address o3
+      inv:  finished(t.increaseAllowance(spender, amt),
+        o2 != sender && o1 != spender |=>
+          t.allowance(sender, spender) = old(t.allowance(sender, spender)) + amt &&
+          t.allowance(sender, o1) = old(t.allowance(sender, o1)) &&
+          t.allowance(o2, o3) = old(t.allowance(o2, o3)) &&
+          t.balanceOf(o3) = old(t.balanceOf(o3)) &&
+          t.totalSupply() = old(t.totalSupply())
+      )
+
+  - name: "decreaseAllowance makes appropriate state changes"
+    category: "erc20"
+    tags: ["decreaseAllowance"]
+    desc: "The function should decrease a user’s allowance by the indicated amount. TotalSupply, other allowances and balances should not be modified"
+    spec: |
+      vars: ERC20 t, address o1, address o2, address o3
+      inv:  finished(t.decreaseAllowance(spender, amt),
+        o2 != sender && o1 != spender |=>
+          t.allowance(sender, spender) = old(t.allowance(sender, spender)) - amt &&
+          t.allowance(sender, o1) = old(t.allowance(sender, o1)) &&
+          t.allowance(o2, o3) = old(t.allowance(o2, o3)) &&
+          t.balanceOf(o3) = old(t.balanceOf(o3)) &&
+          t.totalSupply() = old(t.totalSupply())
+      )
+
+  - name: "burn will revert if a user attempts to burn more than they own"
+    category: "erc20"
+    tags: ["burn"]
+    spec: |
+      vars: ERC20 t
+      inv:  reverted(t.burn(amt), amt > t.balanceOf(sender))
+
+  - name: "burn will reduce a user's balance and the total supply by the indicated amount"
+    category: "erc20"
+    tags: ["burn"]
+    spec: |
+      vars: ERC20 t
+      inv:  finished(t.burn(amt),
+        t.balanceOf(sender) = old(t.balanceOf(sender)) - amt &&
+        t.totalSupply() = old(t.totalSupply()) - amt
+      )
+
+  - name: "burn will not modify a user's balance or any allowances"
+    category: "erc20"
+    tags: ["burn"]
+    spec: |
+      vars: ERC20 t, address o1, address o2, address o3
+      inv:  finished(t.burn(amt),
+        o1 != sender |=>
+          t.balanceOf(o1) = old(t.balanceOf(o1)) &&
+          t.allowance(o2, o3) = old(t.allowance(o2, o3))
+      )
+
+  - name: "Arbitrary users cannot burn from other users"
+    category: "erc20"
+    tags: ["burnFrom"]
+    spec: |
+      vars: ERC20 t
+      inv:  reverted(t.burnFrom(from, amt), fresh(sender))
+
+  - name: "burnFrom will revert if a user attempts to burn more than they own or more than their allowance"
+    category: "erc20"
+    tags: ["burnFrom"]
+    spec: |
+      vars: ERC20 t
+      inv:  reverted(t.burnFrom(from, amt),
+        amt > t.balanceOf(from) || (from != sender && amt > t.allowance(from, sender))
+      )
+
+  - name: "burnFrom will reduce the total supply and the balance of from by the indicated amount"
+    category: "erc20"
+    tags: ["burnFrom"]
+    spec: |
+      vars: ERC20 t
+      inv:  finished(t.burnFrom(from, amt),
+        t.balanceOf(from) = old(t.balanceOf(from)) - amt &&
+        t.totalSupply() = old(t.totalSupply()) - amt &&
+        (from != sender || old(t.allowance(from, sender)) != MAX_INT) ==>
+          t.allowance(from, sender) = old(t.allowance(from, sender)) - amt
+      )
+
+  - name: "burnFrom will not modify another user’s balance or other allowances"
+    category: "erc20"
+    tags: ["burnFrom"]
+    spec: |
+      vars: ERC20 t, address o1, address o2, address o3
+      inv:  finished(t.burnFrom(from, amt),
+        o1 != from && o2 != sender |=>
+          t.balanceOf(o1) = old(t.balanceOf(o1)) &&
+          t.allowance(from, o2) = old(t.allowance(from, o2)) &&
+          t.allowance(o1, o3) = old(t.allowance(o1, o3))
+      )
+
+  - name: "Arbitrary users cannot mint tokens"
+    category: "erc20"
+    tags: ["mint"]
+    spec: |
+      vars: ERC20 t
+      inv:  reverted(t.mint, fresh(sender))
+
+  - name: "mint will increase totalSupply and a user’s balance by the indicated amount"
+    category: "erc20"
+    tags: ["mint"]
+    spec: |
+      vars: ERC20 t
+      inv:  finished(t.mint(amt),
+        t.balanceOf(sender) = old(t.balanceOf(sender)) + amt &&
+        t.totalSupply() = old(t.totalSupply()) + amt
+      )
+
+  - name: "mint will not modify another user’s balance or any allowances"
+    category: "erc20"
+    tags: ["mint"]
+    spec: |
+      vars: ERC20 t, address o1, address o2, address o3
+      inv:  finished(t.mint(amt),
+        o1 != sender |=>
+          t.balanceOf(o1) = old(t.balanceOf(o1)) &&
+          t.allowance(o2, o3) = old(t.allowance(o2, o3))
+      )
+
+  - name: "Arbitrary users cannot mint tokens"
+    category: "erc20"
+    tags: ["mintTo"]
+    spec: |
+      vars: ERC20 t
+      inv:  reverted(t.mintTo, fresh(sender))
+
+  - name: "mintTo will increase totalSupply and the indicated user’s balance by the indicated amount"
+    category: "erc20"
+    tags: ["mintTo"]
+    spec: |
+      vars: ERC20 t
+      inv:  finished(t.mintTo(to, amt),
+        t.balanceOf(to) = old(t.balanceOf(to)) + amt &&
+        t.totalSupply() = old(t.totalSupply()) + amt
+      )
+
+  - name: "mintTo will not modify another user’s balance or any allowances"
+    category: "erc20"
+    tags: ["mintTo"]
+    spec: |
+      vars: ERC20 t, address o1, address o2, address o3
+      inv:  finished(t.mintTo(to, amt),
+        o1 != to |=>
+          t.balanceOf(o1) = old(t.balanceOf(o1)) &&
+          t.allowance(o2, o3) = old(t.allowance(o2, o3))
+      )
+
+  - name: "transferFrom will revert if requested by anyone without approval other than the owner"
+    category: "erc721"
+    tags: ["transferFrom"]
+    spec: |
+      vars: ERC721 t
+      inv:  reverted(t.transferFrom(from, to, id),
+        from != ownerOf(id) ||
+        sender != getApproved(id) ||
+        !isApprovedForAll(from, sender) ||
+        from != sender
+      )
+
+  - name: "transferFrom transfer works correctly"
+    category: "erc721"
+    tags: ["transferFrom"]
+    desc: "Ownership of the token will be transferred from `from` to `to`, the balances of both users will be updated and token approval will be cleared"
+    spec: |
+      vars: ERC721 t
+      inv:  finished(t.transferFrom(from, to, id),
+        to = t.ownerOf(id) &&
+        t.getApproved(id) = address(0) &&
+        t.balanceOf(from) = old(t.balanceOf(from)) - 1 &&
+        t.balanceOf(to) = old(t.balanceOf(to)) + 1
+      )
+
+  - name: "transferFrom does not modify state inappropriately"
+    category: "erc721"
+    tags: ["transferFrom"]
+    desc: "The function will not change the balance of other users, approval of other tokens, ownership of other tokens and user approval"
+    spec: |
+      vars: ERC721 t, uint256 oid, address o1, address o2, address o3
+      inv:  finished(t.transferFrom(from, to, id),
+        oid != id && o1 != from && o1 != to |=>
+          t.ownerOf(oid) = old(t.ownerOf(oid)) &&
+          t.getApproved(oid) = old(t.getApproved(oid))
+          t.balanceOf(o1) = old(t.balanceOf(o1)) &&
+          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3))
+      )
+
+  - name: "safeTransferFrom checks approval"
+    category: "erc721"
+    tags: ["safeTransferFrom"]
+    desc: "The function will revert if requested by anyone without approval other than the owner"
+    spec: |
+      vars: ERC721 t
+      inv:  reverted(t.safeTransferFrom(from, to, id),
+        from != ownerOf(id) ||
+        sender != getApproved(id) ||
+        !isApprovedForAll(from, sender) ||
+        from != sender
+      )
+
+  - name: "safeTransferFrom works correctly"
+    category: "erc721"
+    tags: ["safeTransferFrom"]
+    desc: "Ownership of the token will be transferred from from to to, the balances of both users will be updated and token approval will be cleared"
+    spec: |
+      vars: ERC721 t
+      inv:  finished(t.safeTransferFrom(from, to, id),
+        to = t.ownerOf(id) &&
+        t.getApproved(id) = address(0) &&
+        t.balanceOf(from) = old(t.balanceOf(from)) - 1 &&
+        t.balanceOf(to) = old(t.balanceOf(to)) + 1
+      )
+
+  - name: "safeTransferFrom does not modify state inappropriately"
+    category: "erc721"
+    tags: ["safeTransferFrom"]
+    desc: "The function will not change the balance of other users, approval of other tokens, ownership of other tokens and user approval"
+    spec: |
+      vars: ERC721 t, uint256 oid, address o1, address o2, address o3
+      inv:  finished(t.safeTransferFrom(from, to, id),
+        oid != id && o1 != from && o1 != to |=>
+          t.ownerOf(oid) = old(t.ownerOf(oid)) &&
+          t.getApproved(oid) = old(t.getApproved(oid))
+          t.balanceOf(o1) = old(t.balanceOf(o1)) &&
+          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3))
+      )
+
+  - name: "approve access controls"
+    category: "erc721"
+    tags: ["approve"]
+    desc: "The function will revert if the sender is not the owner or the token or approved by the owner"
+    spec: |
+      vars: ERC721 t
+      inv: reverted(t.approve(spender, id),
+        sender != t.ownerOf(id) ||
+        !isApprovedForAll(t.ownerOf(id), sender)
+      )
+
+  - name: "approve functions correctly"
+    category: "erc721"
+    tags: ["approve"]
+    desc: "The function will set the token’s approval to the indicated user. Everything else will remain the same."
+    spec: |
+      vars: ERC721 t, uint256 oid1, uint256 oid2, address o1, address o2
+      inv: finished(t.approve(spender, id),
+        oid1 != id |=>
+          spender = t.getApproved(id) &&
+          t.getApproved(oid1) = old(t.getApproved(oid1))
+          t.ownerOf(oid2) = old(t.ownerOf(oid2)) &&
+          t.balanceOf(o1) = old(t.balanceOf(o1)) &&
+          t.isApprovedForAll(o1, o2) = old(t.isApprovedForAll(o1, o2))
+      )
+
+  - name: "setApprovalForAll functions correctly"
+    category: "erc721"
+    tags: ["setApprovalForAll"]
+    desc: "The function will set the sender’s approval of the indicated user"
+    spec: |
+      vars: ERC721 t, uint256 oid, address o1, address o2, address o3
+      inv:  finished(t.setApprovalForAll(spender, approved),
+        o2 != sender && o1 != spender |=>
+          approved = t.isApprovalForAll(sender, spender) &&
+          t.isApprovedForAll(sender, o1) = old(t.isApprovedForAll(sender, o1) &&
+          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3) &&
+          t.getApproved(oid) = old(t.getApproved(oid)) &&
+          t.ownerOf(oid) = old(t.ownerOf(oid)) &&
+          t.balanceOf(o3) = old(t.balanceOf(o3))
+      )
+
+  - name: "burn access controls"
+    category: "erc721"
+    tags: ["burn"]
+    desc: "The function will revert if requested by anyone without approval other than the owner"
+    spec: |
+      vars: ERC721 t
+      inv:  reverted(t.burn(id),
+        sender != getApproved(id) ||
+        !isApprovedForAll(t.ownerOf(id), sender) ||
+        ownerOf(id) != sender
+      )
+
+  - name: "burn postcondition"
+    category: "erc721"
+    tags: ["burn"]
+    desc: "The function will clear ownership of the token, adjust the balance of the owner, clear the token’s approval "
+    spec: |
+      vars: ERC721 t
+      inv:  finished(t.burn(id),
+        t.ownerOf(id) = address(0) &&
+        t.getApproved(id) = address(0) &&
+        t.balanceOf(old(t.ownerOf(id)) = old(t.balanceOf(old(t.ownerOf(id))) - 1 &&
+      )
+
+  - name: "burn does not modify state inappropriately"
+    category: "erc721"
+    tags: ["burn"]
+    desc: "The function will not change the balance of other users, approval of other tokens, ownership of other tokens and user approval"
+    spec: |
+      vars: ERC721 t, uint256 oid, address o1, address o2, address o3
+      inv:  finished(t.burn(id),
+        oid != id && o1 != old(t.ownerOf(id)) |=>
+          t.ownerOf(oid) = old(t.ownerOf(oid)) &&
+          t.getApproved(oid) = old(t.getApproved(oid))
+          t.balanceOf(o1) = old(t.balanceOf(o1)) &&
+          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3))
+      )
+
+  - name: "mint access controls"
+    category: "erc721"
+    tags: ["mint"]
+    desc: "Arbitrary users cannot mint tokens"
+    spec: |
+      vars: ERC721 t
+      inv:  reverted(t.mint, fresh(sender))
