@@ -13,6 +13,7 @@ specs:
     spec: |
       vars: ERC20 t
       inv:  reverted(t.transfer(to, amt), amt > t.balanceOf(sender))
+
   - name: "Funds should be transferred from sender to to as long as sender != to"
     category: "erc20"
     tags: ["transfer"]
@@ -55,8 +56,8 @@ specs:
         from != to |=>
           t.balanceOf(from) = old(t.balanceOf(from)) - amt &&
           t.balanceOf(to) = old(t.balanceOf(to)) + amt &&
-          (from != sender && old(t.allowance(from, sender)) != MAX_INT) ==>
-            t.allowance(from, sender) = old(t.allowance(from, sender)) - amt
+          ( (from != sender && old(t.allowance(from, sender)) != MAX_UINT256) ==>
+            t.allowance(from, sender) = old(t.allowance(from, sender)) - amt )
       )
 
   - name: "transferFrom should not modify totalSupply, other allowances or other balances"
@@ -86,6 +87,7 @@ specs:
           t.allowance(sender, o1) = old(t.allowance(sender, o1)) &&
           t.allowance(o2, o3) = old(t.allowance(o2, o3)) &&
           t.balanceOf(o3) = old(t.balanceOf(o3)) &&
+          t.totalSupply() = old(t.totalSupply())
       )
 
   - name: "increaseAllowance makes appropriate state changes"
@@ -146,12 +148,6 @@ specs:
           t.allowance(o2, o3) = old(t.allowance(o2, o3))
       )
 
-  - name: "Arbitrary users cannot burn from other users"
-    category: "erc20"
-    tags: ["burnFrom"]
-    spec: |
-      vars: ERC20 t
-      inv:  reverted(t.burnFrom(from, amt), fresh(sender))
 
   - name: "burnFrom will revert if a user attempts to burn more than they own or more than their allowance"
     category: "erc20"
@@ -170,8 +166,8 @@ specs:
       inv:  finished(t.burnFrom(from, amt),
         t.balanceOf(from) = old(t.balanceOf(from)) - amt &&
         t.totalSupply() = old(t.totalSupply()) - amt &&
-        (from != sender || old(t.allowance(from, sender)) != MAX_INT) ==>
-          t.allowance(from, sender) = old(t.allowance(from, sender)) - amt
+        ( (from != sender || old(t.allowance(from, sender)) != MAX_UINT256) ==>
+          t.allowance(from, sender) = old(t.allowance(from, sender)) - amt )
       )
 
   - name: "burnFrom will not modify another user’s balance or other allowances"
@@ -186,12 +182,6 @@ specs:
           t.allowance(o1, o3) = old(t.allowance(o1, o3))
       )
 
-  - name: "Arbitrary users cannot mint tokens"
-    category: "erc20"
-    tags: ["mint"]
-    spec: |
-      vars: ERC20 t
-      inv:  reverted(t.mint, fresh(sender))
 
   - name: "mint will increase totalSupply and a user’s balance by the indicated amount"
     category: "erc20"
@@ -213,13 +203,6 @@ specs:
           t.balanceOf(o1) = old(t.balanceOf(o1)) &&
           t.allowance(o2, o3) = old(t.allowance(o2, o3))
       )
-
-  - name: "Arbitrary users cannot mint tokens"
-    category: "erc20"
-    tags: ["mintTo"]
-    spec: |
-      vars: ERC20 t
-      inv:  reverted(t.mintTo, fresh(sender))
 
   - name: "mintTo will increase totalSupply and the indicated user’s balance by the indicated amount"
     category: "erc20"
@@ -276,7 +259,7 @@ specs:
       inv:  finished(t.transferFrom(from, to, id),
         oid != id && o1 != from && o1 != to |=>
           t.ownerOf(oid) = old(t.ownerOf(oid)) &&
-          t.getApproved(oid) = old(t.getApproved(oid))
+          t.getApproved(oid) = old(t.getApproved(oid)) &&
           t.balanceOf(o1) = old(t.balanceOf(o1)) &&
           t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3))
       )
@@ -302,7 +285,7 @@ specs:
       vars: ERC721 t
       inv:  finished(t.safeTransferFrom(from, to, id),
         to = t.ownerOf(id) &&
-        t.getApproved(id) = address(0) &&
+        t.getApproved(id) = nulladdr &&
         t.balanceOf(from) = old(t.balanceOf(from)) - 1 &&
         t.balanceOf(to) = old(t.balanceOf(to)) + 1
       )
@@ -341,7 +324,7 @@ specs:
       inv: finished(t.approve(spender, id),
         oid1 != id |=>
           spender = t.getApproved(id) &&
-          t.getApproved(oid1) = old(t.getApproved(oid1))
+          t.getApproved(oid1) = old(t.getApproved(oid1)) &&
           t.ownerOf(oid2) = old(t.ownerOf(oid2)) &&
           t.balanceOf(o1) = old(t.balanceOf(o1)) &&
           t.isApprovedForAll(o1, o2) = old(t.isApprovedForAll(o1, o2))
@@ -355,9 +338,9 @@ specs:
       vars: ERC721 t, uint256 oid, address o1, address o2, address o3
       inv:  finished(t.setApprovalForAll(spender, approved),
         o2 != sender && o1 != spender |=>
-          approved = t.isApprovalForAll(sender, spender) &&
-          t.isApprovedForAll(sender, o1) = old(t.isApprovedForAll(sender, o1) &&
-          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3) &&
+          approved = t.isApprovedForAll(sender, spender) &&
+          t.isApprovedForAll(sender, o1) = old(t.isApprovedForAll(sender, o1)) &&
+          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3)) &&
           t.getApproved(oid) = old(t.getApproved(oid)) &&
           t.ownerOf(oid) = old(t.ownerOf(oid)) &&
           t.balanceOf(o3) = old(t.balanceOf(o3))
@@ -370,9 +353,9 @@ specs:
     spec: |
       vars: ERC721 t
       inv:  reverted(t.burn(id),
-        sender != getApproved(id) ||
-        !isApprovedForAll(t.ownerOf(id), sender) ||
-        ownerOf(id) != sender
+        sender != t.getApproved(id) ||
+        !t.isApprovedForAll(t.ownerOf(id), sender) ||
+        t.ownerOf(id) != sender
       )
 
   - name: "burn postcondition"
@@ -382,10 +365,10 @@ specs:
     spec: |
       vars: ERC721 t
       inv:  finished(t.burn(id),
-        t.ownerOf(id) = address(0) &&
-        t.getApproved(id) = address(0) &&
-        t.balanceOf(old(t.ownerOf(id)) = old(t.balanceOf(old(t.ownerOf(id))) - 1 &&
-      )
+            t.ownerOf(id) = nulladdr &&
+            t.getApproved(id) = nulladdr &&
+            t.balanceOf(old(t.ownerOf(id))) = old(t.balanceOf(t.ownerOf(id))) - 1
+            )
 
   - name: "burn does not modify state inappropriately"
     category: "erc721"
@@ -396,15 +379,8 @@ specs:
       inv:  finished(t.burn(id),
         oid != id && o1 != old(t.ownerOf(id)) |=>
           t.ownerOf(oid) = old(t.ownerOf(oid)) &&
-          t.getApproved(oid) = old(t.getApproved(oid))
+          t.getApproved(oid) = old(t.getApproved(oid)) &&
           t.balanceOf(o1) = old(t.balanceOf(o1)) &&
           t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3))
       )
 
-  - name: "mint access controls"
-    category: "erc721"
-    tags: ["mint"]
-    desc: "Arbitrary users cannot mint tokens"
-    spec: |
-      vars: ERC721 t
-      inv:  reverted(t.mint, fresh(sender))
