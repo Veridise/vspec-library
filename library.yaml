@@ -5,6 +5,9 @@ categories:
   erc721:
     id: 1
     name: "ERC721 (Non-Fungible Token)"
+  erc3156:
+    id: 2
+    name: "ERC3156 (Flash Loan)"
 
 specs:
   - name: "1. transfer should revert if a user attempts to send more funds than they have"
@@ -365,3 +368,23 @@ specs:
           t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3))
       )
 
+  - name: "1. Flash Loan - Loan Amount Maximum"
+    category: "erc3156"
+    tags: ["flashLoan"]
+    desc: "The transaction reverts if the requested flash loan amount is greater than the maxFlashLoan."
+    spec: |
+      vars: IERC3156FlashLender f
+      inv: reverted(f.flashLoan(receiver, token, amt, data), 
+                    amt > f.maxFlashLoan(token)
+      )
+
+  - name: "2. Flash Loan - Balance Preserved"
+    category: "erc3156"
+    tags: ["flashLoan"]
+    desc: "The number of tokens owned by the contract and the max flash loan amount will not decrease as a result of a flash loan."
+    spec: |
+      vars: IERC3156FlashLender f
+      spec: []!finished(f.flashLoan(receiver, token, amt, data),
+                f.maxFlashLoan(token) < old(f.maxFlashLoan(token)) ||
+                token.balanceOf(address(f)) < old(token.balanceOf(address(f)))
+      )
