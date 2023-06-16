@@ -1,0 +1,6 @@
+{
+  "tags": [
+    "safeTransferFrom"
+  ],
+  "desc": "The function will revert if requested by anyone without approval other than the owner"
+}

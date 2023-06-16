@@ -1,0 +1,6 @@
+{
+  "tags": [
+    "decreaseAllowance"
+  ],
+  "desc": "The function should decrease a user\u2019s allowance by the indicated amount. TotalSupply, other allowances and balances should not be modified"
+}

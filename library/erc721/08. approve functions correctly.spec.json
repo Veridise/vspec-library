@@ -1,0 +1,6 @@
+{
+  "tags": [
+    "approve"
+  ],
+  "desc": "The function will set the token\u2019s approval to the indicated user. Everything else will remain the same."
+}

@@ -1,0 +1,6 @@
+{
+  "tags": [
+    "approve"
+  ],
+  "desc": "approve should never finish in a state where the allowance of the spender is not equal to the given amount. totalSupply, other allowances and balances should not be modified"
+}

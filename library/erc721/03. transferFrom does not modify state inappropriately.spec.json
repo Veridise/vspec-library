@@ -1,0 +1,6 @@
+{
+  "tags": [
+    "transferFrom"
+  ],
+  "desc": "The function will not change the balance of other users, approval of other tokens, ownership of other tokens and user approval"
+}

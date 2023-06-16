@@ -1,0 +1,6 @@
+{
+  "tags": [
+    "flashLoan"
+  ],
+  "desc": "The number of tokens owned by the contract and the max flash loan amount will not decrease as a result of a flash loan."
+}
