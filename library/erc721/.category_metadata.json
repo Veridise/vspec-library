@@ -1,4 +1,7 @@
 {
   "name": "ERC721 (Non-Fungible Token)",
-  "view_order": 1
+  "view_order": 1,
+  "platforms": [
+    "ethereum"
+  ]
 }
