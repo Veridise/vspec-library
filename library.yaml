@@ -212,9 +212,9 @@ specs:
       vars: ERC721 t
       inv:  reverted(t.transferFrom(from, to, id),
         from != ownerOf(id) ||
-        sender != getApproved(id) ||
-        !isApprovedForAll(from, sender) ||
-        from != sender
+        (sender != getApproved(id) &&
+        !isApprovedForAll(from, sender) &&
+        from != sender)
       )
 
   - name: "2. transferFrom transfer works correctly"
@@ -241,9 +241,10 @@ specs:
           t.ownerOf(oid) = old(t.ownerOf(oid)) &&
           t.getApproved(oid) = old(t.getApproved(oid)) &&
           t.balanceOf(o1) = old(t.balanceOf(o1)) &&
-          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3))
+          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3)) &&
+          t.isApprovedForAll(o1, o2) = old(t.isApprovedForAll(o1, o2))
       )
-
+  
   - name: "4. safeTransferFrom checks approval"
     category: "erc721"
     tags: ["safeTransferFrom"]
@@ -252,9 +253,11 @@ specs:
       vars: ERC721 t
       inv:  reverted(t.safeTransferFrom(from, to, id),
         from != ownerOf(id) ||
-        sender != getApproved(id) ||
-        !isApprovedForAll(from, sender) ||
-        from != sender
+        (
+        (sender != getApproved(id) &&
+        !isApprovedForAll(from, sender) &&
+        from != sender)
+        )
       )
 
   - name: "5. safeTransferFrom works correctly"
@@ -281,17 +284,18 @@ specs:
           t.ownerOf(oid) = old(t.ownerOf(oid)) &&
           t.getApproved(oid) = old(t.getApproved(oid)) &&
           t.balanceOf(o1) = old(t.balanceOf(o1)) &&
-          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3))
+          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3)) &&
+          t.isApprovedForAll(o1, o2) = old(t.isApprovedForAll(o1, o2))
       )
 
   - name: "7. approve access controls"
     category: "erc721"
     tags: ["approve"]
-    desc: "The function will revert if the sender is not the owner or the token or approved by the owner"
+    desc: "The function will revert if the sender is not the owner and the owner has not approved the sender for all"
     spec: |
       vars: ERC721 t
       inv: reverted(t.approve(spender, id),
-        sender != t.ownerOf(id) ||
+        sender != t.ownerOf(id) &&
         !isApprovedForAll(t.ownerOf(id), sender)
       )
 
@@ -333,8 +337,8 @@ specs:
     spec: |
       vars: ERC721 t
       inv:  reverted(t.burn(id),
-        sender != t.getApproved(id) ||
-        !t.isApprovedForAll(t.ownerOf(id), sender) ||
+        sender != t.getApproved(id) &&
+        !t.isApprovedForAll(t.ownerOf(id), sender) &&
         t.ownerOf(id) != sender
       )
 
@@ -361,7 +365,8 @@ specs:
           t.ownerOf(oid) = old(t.ownerOf(oid)) &&
           t.getApproved(oid) = old(t.getApproved(oid)) &&
           t.balanceOf(o1) = old(t.balanceOf(o1)) &&
-          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3))
+          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3)) &&
+          t.isApprovedForAll(o1, o2) = old(t.isApprovedForAll(o1, o2))
       )
 
   - name: "1. Flash Loan - Loan Amount Maximum"
