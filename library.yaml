@@ -241,7 +241,8 @@ specs:
           t.ownerOf(oid) = old(t.ownerOf(oid)) &&
           t.getApproved(oid) = old(t.getApproved(oid)) &&
           t.balanceOf(o1) = old(t.balanceOf(o1)) &&
-          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3))
+          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3)) &&
+          t.isApprovedForAll(o1, o2) = old(t.isApprovedForAll(o1, o2))
       )
 
   - name: "4. safeTransferFrom checks approval"
@@ -281,7 +282,8 @@ specs:
           t.ownerOf(oid) = old(t.ownerOf(oid)) &&
           t.getApproved(oid) = old(t.getApproved(oid)) &&
           t.balanceOf(o1) = old(t.balanceOf(o1)) &&
-          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3))
+          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3)) &&
+          t.isApprovedForAll(o1, o2) = old(t.isApprovedForAll(o1, o2))
       )
 
   - name: "7. approve access controls"
@@ -361,7 +363,8 @@ specs:
           t.ownerOf(oid) = old(t.ownerOf(oid)) &&
           t.getApproved(oid) = old(t.getApproved(oid)) &&
           t.balanceOf(o1) = old(t.balanceOf(o1)) &&
-          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3))
+          t.isApprovedForAll(o2, o3) = old(t.isApprovedForAll(o2, o3)) &&
+          t.isApprovedForAll(o1, o2) = old(t.isApprovedForAll(o1, o2))
       )
 
   - name: "1. Flash Loan - Loan Amount Maximum"
