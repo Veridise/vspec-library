@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 
-import json
 import os
-from pathlib import Path
 from utils import read_json, write_json, read_file
 
 
 def main():
     SPEC_EXTENSION = ".spec"
     in_path = os.path.join(os.getcwd(), "library")
-    out_path = "vspec_library.json"
     library = {"categories": [], "specs": []}
 
     print("Reading categories...")
