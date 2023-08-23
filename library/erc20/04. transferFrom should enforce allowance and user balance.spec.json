@@ -1,0 +1,6 @@
+{
+  "tags": [
+    "transferFrom"
+  ],
+  "desc": "transferFrom should revert when the amount requested is greater than what the spender owns or beyond the recipient's allowance"
+}

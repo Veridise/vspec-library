@@ -1,0 +1,6 @@
+{
+  "tags": [
+    "safeTransferFrom"
+  ],
+  "desc": "Ownership of the token will be transferred from `from` to `to`, the balances of both users will be updated and token approval will be cleared"
+}

@@ -81,7 +81,7 @@ specs:
     tags: ["approve"]
     desc: |
       approve should never finish in a state where the allowance of the spender is not equal to the given amount.
-      totalSupply, other allowances and balances should not be modified"
+      totalSupply, other allowances and balances should not be modified
     spec: |
       vars: ERC20 t, address o1, address o2, address o3
       inv:  finished(t.approve(spender, amt),
@@ -151,7 +151,6 @@ specs:
           t.allowance(o2, o3) = old(t.allowance(o2, o3))
       )
 
-
   - name: "13. burnFrom will revert if a user attempts to burn more than they own or more than their allowance"
     category: "erc20"
     tags: ["burnFrom"]
@@ -185,7 +184,6 @@ specs:
           t.allowance(o1, o3) = old(t.allowance(o1, o3))
       )
 
-
   - name: "16. mint will increase totalSupply and a user’s balance by the indicated amount"
     category: "erc20"
     tags: ["mint"]
@@ -195,7 +193,6 @@ specs:
         t.balanceOf(acc) = old(t.balanceOf(acc)) + amt &&
         t.totalSupply() = old(t.totalSupply()) + amt
       )
-
 
   - name: "17. mint will not modify another user’s balance or any allowances"
     category: "erc20"
@@ -207,7 +204,6 @@ specs:
           t.balanceOf(o1) = old(t.balanceOf(o1)) &&
           t.allowance(o2, o3) = old(t.allowance(o2, o3))
       )
-
 
   - name: "1. transferFrom will revert if requested by anyone without approval other than the owner"
     category: "erc721"

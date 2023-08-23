@@ -1,0 +1,6 @@
+{
+  "tags": [
+    "flashLoan"
+  ],
+  "desc": "The transaction reverts if the requested flash loan amount is greater than the maxFlashLoan."
+}

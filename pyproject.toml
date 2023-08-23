@@ -10,3 +10,5 @@ dependencies = [
   "PyYAML == 6.0",
 ]
 
+[tool.setuptools]
+py-modules = []
