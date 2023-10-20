@@ -2,7 +2,7 @@
 set -e
 
 if [ -z "$1" ]; then
-	echo "Must specify one of 'dev', 'internal', 'staging', or 'local' as a target for the deployment of the V spec library"
+	echo "Must specify one of 'dev', 'internal', 'staging', 'production', or 'local' as a target for the deployment of the V spec library"
 	exit 1
 fi
 LATEST_FILE="vspec_library.latest"
@@ -13,7 +13,7 @@ VERSION_FILE=""vspec_library_$VERSION.json""
 read -p "Press ENTER to deploy $VERSION_FILE and $LATEST_FILE to environment $TARGET"
 
 case "$TARGET" in
-	dev | internal | staging)
+	dev | internal | staging | production)
 		echo "Uploading version file $VERSION_FILE to s3://veridise-$TARGET/vspeclib/"
 		aws s3 cp "$VERSION_FILE" "s3://veridise-$TARGET/vspeclib/"
 		echo "Uploading $LATEST_FILE to s3://veridise-$TARGET/vspeclib/"
