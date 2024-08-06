@@ -1,2 +1,2 @@
 vars: ERC20 t
-inv:  reverted(t.transfer(to, amt), amt > t.balanceOf(sender))
+spec: []!finished(t.transfer(to, amt), amt > old(t.balanceOf(sender)))

@@ -1,5 +1,7 @@
 vars: ERC721 t
-inv: reverted(t.approve(spender, id),
-  sender != t.ownerOf(id) &&
-  !isApprovedForAll(t.ownerOf(id), sender)
+spec: []!finished(t.approve(spender, id),
+       old(
+         sender != t.ownerOf(id) ||
+         !t.isApprovedForAll(t.ownerOf(id), sender)
+  )
 )
