@@ -1,4 +1,4 @@
 vars: ERC20 t
-inv:  reverted(t.transferFrom(from, to, amt),
-  amt > t.balanceOf(from) || (from != sender && amt > t.allowance(from, sender))
-)
+spec: []!finished(t.transferFrom(from, to, amt),
+          amt > old(t.balanceOf(from)) ||
+          (from != sender && amt > old(t.allowance(from, sender))))

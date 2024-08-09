@@ -1,7 +1,9 @@
 vars: ERC721 t
-inv:  reverted(t.safeTransferFrom(from, to, id),
-  from != ownerOf(id) ||
-  (sender != getApproved(id) &&
-  !isApprovedForAll(from, sender) &&
-  from != sender)
-)
+spec: []!finished(t.safeTransferFrom(from, to, id),
+        old(
+          from != t.ownerOf(id) ||
+          sender != t.getApproved(id) ||
+          !t.isApprovedForAll(from, sender) ||
+          from != sender
+        )
+      )
