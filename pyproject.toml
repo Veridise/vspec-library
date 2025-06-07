@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "veridise_vspec_library"
 version = "0.0.1"
+requires-python = ">=3.12"
 dependencies = [
   "tomli == 2.0.1",
   "PyYAML == 6.0",
