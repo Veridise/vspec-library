@@ -1,0 +1,38 @@
+name: Release & Upload to S3
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+        default: 'dev'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run lib release
+        uses: Veridise/release_helpers/.github/actions/lib-release-action@main
+        with:
+            environment: ${{ inputs.environment }}
+            bucket_name: "${{ inputs.environment }}-oregon-main-audithub"
+            bucket_path: vspeclib
+            version: ${{ inputs.version }}
