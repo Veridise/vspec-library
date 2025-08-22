@@ -39,11 +39,11 @@ case "$TARGET" in
 		;;
 	local)
 		echo "Listing contents of $$object_storage_full_path to verify rclone is here and connection works..."
-		rclone ls $object_storage_full_path
+		rclone ls $object_storage_full_path --no-check-certificate
 		echo "Uploading version file $VERSION_FILE to $object_storage_full_path"
-		rclone copy "$VERSION_FILE" $object_storage_full_path
+		rclone copy "$VERSION_FILE" $object_storage_full_path --no-check-certificate
 		echo "Uploading $LATEST_FILE to $object_storage_full_path"
-		rclone copy "$LATEST_FILE" $object_storage_full_path
+		rclone copy "$LATEST_FILE" $object_storage_full_path --no-check-certificate
 		;;
 	*)
 		echo "Unknown target environment: $TARGET"
