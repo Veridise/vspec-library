@@ -2,3 +2,4 @@
 .venv
 .vscode
 vspec_library*.json
+__pycache__/
