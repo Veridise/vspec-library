@@ -29,6 +29,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v4.6.0
+        with:
+          python-version: "3.11"
+
+      - run: |
+          python3 -m venv ./.venv
+          source ./.venv/bin/activate
+          pip install -e .
+          ./release.sh ${{ inputs.version }}
+
       - name: Run lib release
         uses: Veridise/release_helpers/.github/actions/lib-release-action@main
         with:
