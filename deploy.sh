@@ -11,7 +11,7 @@ TARGET="$1"
 VERSION=$(cat $LATEST_FILE)
 VERSION_FILE="vspec_library_$VERSION.json"
 BUCKET_PATH="${BUCKET_PATH:-vspeclib}"
-OBJECT_STORAGE_CONF="S3"
+OBJECT_STORAGE_CONF="s3"
 
 if [ "$TARGET" != "local" ]; then
     if [ -z "$BUCKET_NAME" ] || [ -z "$BUCKET_PATH" ]; then
