@@ -1,0 +1,39 @@
+name: Release & Dev Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, ex v1.4'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release-and-deploy:
+    runs-on: [dev]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4.6.0
+        with:
+          python-version: "3.11"
+
+      - name: Create Release files
+        run: |
+          python3 -m venv ./.venv
+          source ./.venv/bin/activate
+          pip install -e .
+          ./release.sh ${{ inputs.version }}
+
+      - name: Run library release
+        uses: Veridise/release_helpers/.github/actions/library-release-action/release@main
+        with:
+            bucket_name: "dev-oregon-main-audithub"
+            bucket_path: vspeclib
+            version: ${{ inputs.version }}

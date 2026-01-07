@@ -1,10 +1,10 @@
-name: Release & Upload to S3
+name: Deploy to Existing Environment
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to deploy'
+        description: 'Version to deploy, ex v1.4'
         required: true
         type: string
       environment:
@@ -23,24 +23,25 @@ permissions:
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/main'
     runs-on: ${{ inputs.environment == 'prod' && 'prod-vspec-lib' || inputs.environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v4.6.0
+      - name: Setup Python
+        uses: actions/setup-python@v4.6.0
         with:
           python-version: "3.11"
 
-      - run: |
+      - name: Create Relese Files
+        run: |
           python3 -m venv ./.venv
           source ./.venv/bin/activate
           pip install -e .
           ./release.sh ${{ inputs.version }}
 
-      - name: Run lib release
-        uses: Veridise/release_helpers/.github/actions/lib-release-action@main
+      - name: Run library Deploy
+        uses: Veridise/release_helpers/.github/actions/library-release-action/deploy@main
         with:
             environment: ${{ inputs.environment }}
             bucket_name: "${{ inputs.environment }}-oregon-main-audithub"
