@@ -1,9 +1,9 @@
 vars: ERC721 t
 spec: []!finished(t.safeTransferFrom(from, to, id),
-        old(
-          from != t.ownerOf(id) ||
-          sender != t.getApproved(id) ||
-          !t.isApprovedForAll(from, sender) ||
+      from != t.ownerOf(id) ||
+      old(
+          sender != t.getApproved(id) &&
+          !t.isApprovedForAll(from, sender) &&
           from != sender
-        )
       )
+    )
