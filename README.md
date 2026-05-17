@@ -14,11 +14,6 @@ data to a single JSON file.
 
 The workflow is to edit specs and metadata inside the `library` directory, and invoke `compile.py` to verify things are working. When ready, call `release.sh` to make a new named release, and then call `deploy.sh` to upload the latest produced version to one of the SaaS deployments for consumption.
 
-## TODO
-
-    1. make the compile command more production ready by:
-        a. checking the metadata format against a Pydantic model
-        b. syntax-checking the individual spec files using an actual V parser.
 
 ## Local deployment to Minio
 
